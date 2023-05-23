@@ -8,8 +8,8 @@ AU = 149.6e9  # 1 AU (1 Astronomical Unit) = 149.6 million km = 149.6 billion m 
 G = 6.67428e-11  # Gravitational constant
 
 # UI related constants
-WIDTH, HEIGHT = 800, 800
-SCALE = 250 / AU  # 1AU = 100 pixels
+WIDTH, HEIGHT = 400, 400
+SCALE = 120 / AU  # 1AU = 100 pixels
 TIME_STEP = 60 * 60 * 24  # 1 day
 
 
@@ -77,7 +77,7 @@ class CelestialObject:
         self.x += self.x_vel * TIME_STEP
         self.y += self.y_vel * TIME_STEP
 
-    def draw(self, window, font):
+    def draw(self, window):
         x = self.x * SCALE + WIDTH / 2
         y = self.y * SCALE + HEIGHT / 2
 
@@ -93,7 +93,7 @@ class Planet(CelestialObject):
         self.parent_star = parent_star
         self.distance_to_parent = math.dist(self.get_position(), parent_star.get_position())
 
-    def draw(self, window, font):
+    def draw(self, window):
         if len(self.orbit) > 2:
             updated_points = []
             for point in self.orbit:
@@ -102,10 +102,7 @@ class Planet(CelestialObject):
                 y = y * SCALE + HEIGHT / 2
                 updated_points.append((x, y))
             pygame.draw.lines(window, self.color.value, False, updated_points, 1)
-        super().draw(window, font)
-
-        distance_text = font.render(f"{round(self.distance_to_parent / 1000)}km", 1, Color.DEFAULT.value)
-        window.blit(distance_text, (self.x - distance_text.get_width() / 2, self.y - distance_text.get_height() / 2))
+        super().draw(window)
 
     def update_position(self, bodies):
         super().update_position(bodies)
@@ -126,29 +123,29 @@ class SolarSystem:
         for planet in self.planets:
             planet.update_position(bodies)
 
-    def draw(self, window, font):
-        self.star.draw(window, font)
+    def draw(self, window):
+        self.star.draw(window)
         for planet in self.planets:
-            planet.draw(window, font)
+            planet.draw(window)
 
 
 def create_solar_system():
-    sun = CelestialObject(30, Color.SUN, 1.98892 * 10 ** 30)
+    sun = CelestialObject(16, Color.SUN, 1.98892 * 10 ** 30)
     sun.set_position(0, 0)
 
-    mercury = Planet(sun, 8, Color.MERCURY, 3.30 * 10 ** 23)
+    mercury = Planet(sun, 4, Color.MERCURY, 3.30 * 10 ** 23)
     mercury.set_position(0.387 * AU, 0)
     mercury.set_velocity(0, 47400)
 
-    venus = Planet(sun, 11, Color.VENUS, 4.8685 * 10 ** 24)
+    venus = Planet(sun, 5, Color.VENUS, 4.8685 * 10 ** 24)
     venus.set_position(-0.723 * AU, 0)
     venus.set_velocity(0, -35020)
 
-    earth = Planet(sun, 11, Color.EARTH, 5.9742 * 10 ** 24)
+    earth = Planet(sun, 5, Color.EARTH, 5.9742 * 10 ** 24)
     earth.set_position(1 * AU, 0)
     earth.set_velocity(0, 29783)
 
-    mars = Planet(sun, 9, Color.MARS, 6.39 * 10 ** 23)
+    mars = Planet(sun, 4, Color.MARS, 6.39 * 10 ** 23)
     mars.set_position(-1.524 * AU, 0)
     mars.set_velocity(0, -24077)
 
@@ -157,7 +154,7 @@ def create_solar_system():
     return SolarSystem(sun, planets)
 
 
-def simulate(window, font):
+def simulate(window):
     clock = pygame.time.Clock()
 
     solar_system = create_solar_system()
@@ -172,7 +169,7 @@ def simulate(window, font):
                 run = False
 
         solar_system.update_positions()
-        solar_system.draw(window, font)
+        solar_system.draw(window)
 
         pygame.display.update()
 
@@ -183,8 +180,7 @@ def main():
     pygame.init()
     win = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Planet Simulation")
-    font = pygame.font.SysFont("comicsans", 16)
-    simulate(win, font)
+    simulate(win)
 
 
 if __name__ == '__main__':
