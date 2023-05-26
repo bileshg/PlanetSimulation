@@ -61,7 +61,7 @@ class CelestialObject:
         distance_x, distance_y = self.calculate_distance_vectors(other_body)
         distance = math.dist(self.get_position(), other_body.get_position())
 
-        force = G * self.mass * other_body.mass / distance**2
+        force = G * self.mass * other_body.mass / distance ** 2
         theta = math.atan2(distance_y, distance_x)
         force_x = math.cos(theta) * force
         force_y = math.sin(theta) * force
@@ -130,8 +130,8 @@ class Planet(CelestialObject):
 
         # Display Name and Distance
         planet_name = font.render(self.name, True, Color.DEFAULT.value)
-        distance_text = font.render(f"{round(self.distance_to_parent/1000)} km", True,
-                                Color.DEFAULT.value)
+        distance_text = font.render(f"{round(self.distance_to_parent / 1000)} km", True,
+                                    Color.DEFAULT.value)
         window.blit(planet_name, (x, y + self.radius))
         window.blit(distance_text, (x, y + self.radius + 10))
 
@@ -171,22 +171,22 @@ class SolarSystem:
 
 
 def create_solar_system():
-    sun = CelestialObject("Sun", 16, Color.SUN, 1.98892 * 10**30)
+    sun = CelestialObject("Sun", 16, Color.SUN, 1.98892 * 10 ** 30)
     sun.set_position(0, 0)
 
-    mercury = Planet("Mercury", sun, 4, Color.MERCURY, 3.30 * 10**23)
+    mercury = Planet("Mercury", sun, 4, Color.MERCURY, 3.30 * 10 ** 23)
     mercury.set_position(0.387 * AU, 0)
     mercury.set_velocity(0, 47400)
 
-    venus = Planet("Venus", sun, 5, Color.VENUS, 4.8685 * 10**24)
+    venus = Planet("Venus", sun, 5, Color.VENUS, 4.8685 * 10 ** 24)
     venus.set_position(-0.723 * AU, 0)
     venus.set_velocity(0, -35020)
 
-    earth = Planet("Earth", sun, 5, Color.EARTH, 5.9742 * 10**24)
+    earth = Planet("Earth", sun, 5, Color.EARTH, 5.9742 * 10 ** 24)
     earth.set_position(1 * AU, 0)
     earth.set_velocity(0, 29783)
 
-    mars = Planet("Mars", sun, 4, Color.MARS, 6.39 * 10**23)
+    mars = Planet("Mars", sun, 4, Color.MARS, 6.39 * 10 ** 23)
     mars.set_position(-1.524 * AU, 0)
     mars.set_velocity(0, -24077)
 
