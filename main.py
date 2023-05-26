@@ -25,7 +25,14 @@ class Color(Enum):
 
 class CelestialObject:
 
-    def __init__(self, radius, color, mass, position=(0, 0), velocity=(0, 0)):
+    def __init__(self,
+                 name,
+                 radius,
+                 color,
+                 mass,
+                 position=(0, 0),
+                 velocity=(0, 0)):
+        self.name = name
         self.radius = radius
         self.color = color
         self.mass = mass
@@ -54,7 +61,7 @@ class CelestialObject:
         distance_x, distance_y = self.calculate_distance_vectors(other_body)
         distance = math.dist(self.get_position(), other_body.get_position())
 
-        force = G * self.mass * other_body.mass / distance ** 2
+        force = G * self.mass * other_body.mass / distance**2
         theta = math.atan2(distance_y, distance_x)
         force_x = math.cos(theta) * force
         force_y = math.sin(theta) * force
@@ -77,23 +84,34 @@ class CelestialObject:
         self.x += self.x_vel * TIME_STEP
         self.y += self.y_vel * TIME_STEP
 
-    def draw(self, window):
+    def draw(self, window, font):
         x = self.x * SCALE + WIDTH / 2
         y = self.y * SCALE + HEIGHT / 2
 
         pygame.draw.circle(window, self.color.value, (x, y), self.radius)
+        body_name = font.render(self.name, True, Color.DEFAULT.value)
+        window.blit(body_name, (x, y + self.radius))
 
 
 class Planet(CelestialObject):
 
-    def __init__(self, parent_star, radius, color, mass, position=(0, 0), velocity=(0, 0)):
-        super().__init__(radius, color, mass, position, velocity)
+    def __init__(self,
+                 name,
+                 parent_star,
+                 radius,
+                 color,
+                 mass,
+                 position=(0, 0),
+                 velocity=(0, 0)):
+        super().__init__(name, radius, color, mass, position, velocity)
 
         self.orbit = []
         self.parent_star = parent_star
-        self.distance_to_parent = math.dist(self.get_position(), parent_star.get_position())
+        self.distance_to_parent = math.dist(self.get_position(),
+                                            parent_star.get_position())
 
-    def draw(self, window):
+    def draw(self, window, font):
+        # Draw Orbit
         if len(self.orbit) > 2:
             updated_points = []
             for point in self.orbit:
@@ -101,18 +119,38 @@ class Planet(CelestialObject):
                 x = x * SCALE + WIDTH / 2
                 y = y * SCALE + HEIGHT / 2
                 updated_points.append((x, y))
-            pygame.draw.lines(window, self.color.value, False, updated_points, 1)
-        super().draw(window)
+            pygame.draw.lines(window, self.color.value, False, updated_points,
+                              1)
+
+        x = self.x * SCALE + WIDTH / 2
+        y = self.y * SCALE + HEIGHT / 2
+
+        # Draw Planet
+        pygame.draw.circle(window, self.color.value, (x, y), self.radius)
+
+        # Display Name and Distance
+        planet_name = font.render(self.name, True, Color.DEFAULT.value)
+        distance_text = font.render(f"{round(self.distance_to_parent/1000)} km", True,
+                                Color.DEFAULT.value)
+        window.blit(planet_name, (x, y + self.radius))
+        window.blit(distance_text, (x, y + self.radius + 10))
 
     def update_position(self, bodies):
         super().update_position(bodies)
-        self.distance_to_parent = math.dist(self.get_position(), self.parent_star.get_position())
+        self.distance_to_parent = math.dist(self.get_position(),
+                                            self.parent_star.get_position())
         self.orbit.append((self.x, self.y))
+
+        tail_length = int(self.distance_to_parent * SCALE)
+
+        if len(self.orbit) > tail_length:
+            self.orbit = self.orbit[-tail_length:]
 
 
 class SolarSystem:
 
-    def __init__(self, star, planets):
+    def __init__(self, name, star, planets):
+        self.name = name
         self.star = star
         self.planets = planets
 
@@ -123,40 +161,41 @@ class SolarSystem:
         for planet in self.planets:
             planet.update_position(bodies)
 
-    def draw(self, window):
-        self.star.draw(window)
+    def draw(self, window, font):
+        solar_system_name = font.render(self.name, True, Color.DEFAULT.value)
+        window.blit(solar_system_name, (0, 0))
+
+        self.star.draw(window, font)
         for planet in self.planets:
-            planet.draw(window)
+            planet.draw(window, font)
 
 
 def create_solar_system():
-    sun = CelestialObject(16, Color.SUN, 1.98892 * 10 ** 30)
+    sun = CelestialObject("Sun", 16, Color.SUN, 1.98892 * 10**30)
     sun.set_position(0, 0)
 
-    mercury = Planet(sun, 4, Color.MERCURY, 3.30 * 10 ** 23)
+    mercury = Planet("Mercury", sun, 4, Color.MERCURY, 3.30 * 10**23)
     mercury.set_position(0.387 * AU, 0)
     mercury.set_velocity(0, 47400)
 
-    venus = Planet(sun, 5, Color.VENUS, 4.8685 * 10 ** 24)
+    venus = Planet("Venus", sun, 5, Color.VENUS, 4.8685 * 10**24)
     venus.set_position(-0.723 * AU, 0)
     venus.set_velocity(0, -35020)
 
-    earth = Planet(sun, 5, Color.EARTH, 5.9742 * 10 ** 24)
+    earth = Planet("Earth", sun, 5, Color.EARTH, 5.9742 * 10**24)
     earth.set_position(1 * AU, 0)
     earth.set_velocity(0, 29783)
 
-    mars = Planet(sun, 4, Color.MARS, 6.39 * 10 ** 23)
+    mars = Planet("Mars", sun, 4, Color.MARS, 6.39 * 10**23)
     mars.set_position(-1.524 * AU, 0)
     mars.set_velocity(0, -24077)
 
     planets = [mercury, venus, earth, mars]
 
-    return SolarSystem(sun, planets)
+    return SolarSystem("The Solar System", sun, planets)
 
 
-def simulate(window):
-    clock = pygame.time.Clock()
-
+def run_simulation(window, clock, font):
     solar_system = create_solar_system()
 
     run = True
@@ -169,7 +208,7 @@ def simulate(window):
                 run = False
 
         solar_system.update_positions()
-        solar_system.draw(window)
+        solar_system.draw(window, font)
 
         pygame.display.update()
 
@@ -179,8 +218,10 @@ def simulate(window):
 def main():
     pygame.init()
     win = pygame.display.set_mode((WIDTH, HEIGHT))
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont(pygame.font.get_fonts()[0], 10)
     pygame.display.set_caption("Planet Simulation")
-    simulate(win)
+    run_simulation(win, clock, font)
 
 
 if __name__ == '__main__':
