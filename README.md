@@ -27,3 +27,7 @@ The application consists of three classes: `CelestialObject`, `Planet`, and `Sol
 - `SolarSystem` is a class that encapsulates a whole solar system, including a central star and multiple planets.
 
 The simulation involves calculating gravitational forces and updating positions of celestial objects, and drawing orbits for planets.
+
+## Acknowledgments
+
+Thanks to [TechWithTim](https://www.youtube.com/@TechWithTim) for the inspiration and the tutorial on which this project is based.
